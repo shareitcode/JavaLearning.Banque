@@ -15,11 +15,12 @@ public class RemoteClient {
 	public static void main(String[] args) {
 		try {
 			BanqueRemote banque = getBanqueRemote();
-			Compte[] comptes = banque.consulterComptes();
-			
-			if (comptes.length > 0) {
-				System.out.println(comptes.length);
-				Arrays.stream(comptes).forEach(c -> System.out.println(c.getCode()));
+			if (banque != null) {
+				Compte[] comptes = banque.consulterComptes();
+				
+				if (comptes.length > 0) {
+					Arrays.stream(comptes).forEach(c -> System.out.println(banque.consulterCompte(c.getCode())));
+				}
 			}
 		} catch (NamingException e) {
 			System.out.println("Can't resolve BanqueRemote!");
@@ -29,7 +30,7 @@ public class RemoteClient {
 	
 	private static BanqueRemote getBanqueRemote() throws NamingException {
 		Context context = getContext();
-		String appName = "";
+		String appName = "Banque.EAR";
 		String moduleName = "Banque.EJB";
 		String distinctName = "Banque";
 		String viewClassName = BanqueRemote.class.getName();
@@ -43,9 +44,10 @@ public class RemoteClient {
 	
 	private static Context getContext() throws NamingException {
 		Properties properties = new Properties();
-		properties.put(Context.INITIAL_CONTEXT_FACTORY, "org.jboss.naming.HttpNamingContextFactory");
+		properties.put(Context.INITIAL_CONTEXT_FACTORY, "org.wildfly.naming.client.WildFlyInitialContextFactory");
 		properties.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
 		properties.put(Context.PROVIDER_URL, "http-remoting://localhost:8080");
+		properties.put("jboss.naming.client.ejb.context", true);
 		return new InitialContext(properties);
 	}
 
